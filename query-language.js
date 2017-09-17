@@ -1,6 +1,5 @@
 var P = require('Parsimmon');
 
-// TODO: why variables are not included in result?
 
 let whitespace = P.regexp(/\s*/m);
 function token(parser) {
@@ -9,6 +8,7 @@ function token(parser) {
 function word(str) {
     return P.string(str).thru(token);
 }
+// TODO: might be helpful? From here: https://github.com/jneen/parsimmon/blob/master/examples/json.js
 function interpretEscapes(str) {
     let escapes = {
         b: '\b',
@@ -57,12 +57,12 @@ var QueryLang = P.createLanguage({
     },
     operator: function () {
         return P.alt(
-            P.string("="),
-            P.string("!="),
-            P.string("<="),
-            P.string(">="),
-            P.string("<"),
-            P.string(">")
+            word("="),
+            word("!="),
+            word("<="),
+            word(">="),
+            word("<"),
+            word(">")
         );
     },
     value: function (r) {
@@ -82,9 +82,9 @@ var QueryLang = P.createLanguage({
         return P.regexp(/-?\d+/).map(Number)
     },
     array: function (r) {
-        return P.string("[")
+        return word("[")
             .then(P.alt(r.quotedString, r.decimalNumber, r.number).sepBy(r._))
-            .skip(P.string("]"))
+            .skip(word("]"))
     },
     _: function () {
         return P.optWhitespace;
