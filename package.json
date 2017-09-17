@@ -1,0 +1,14 @@
+{
+  "name": "parsimmon-query-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "query-language.js",
+  "scripts": {
+    "start": "node ./query-language.js"
+  },
+  "author": "Oleksii Lisikh",
+  "license": "ISC",
+  "dependencies": {
+    "parsimmon": "^1.6.2"
+  }
+}
