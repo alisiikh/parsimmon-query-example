@@ -43,7 +43,7 @@ let QueryLang = P.createLanguage({
     /**
      * Matches a variable
      */
-    variable: () => (P.regex(/[a-zA-Z_]\w*/)).desc("variable"),
+    variable: () => P.regex(/[a-zA-Z_]\w*/).desc("variable"),
     /**
      * Matches allowed operator
      */
@@ -75,9 +75,9 @@ let QueryLang = P.createLanguage({
     comma: () => word(','),
 
     // TODO: this regexp is not perfect, is it possible to have multiple repeatable " symbols in a string?
-    quotedString: () => (P.regexp(/"([^"\x00-\x1F\x7F]|[a-fA-F0-9]{4})*"/)).desc("string"),
-    decimalNumber: () => (P.regexp(/(\d+(\.\d*)?|\d*\.\d+)/)).map(Number).desc("decimal number"),
-    number: () => (P.regexp(/-?\d+/)).map(Number).desc("number"),
+    quotedString: () => P.regexp(/"([^"\x00-\x1F\x7F]|[a-fA-F0-9]{4})*"/).desc("string"),
+    decimalNumber: () => P.regexp(/(\d+(\.\d*)?|\d*\.\d+)/).map(Number).desc("decimal number"),
+    number: () => P.regexp(/-?\d+/).map(Number).desc("number"),
     array: (r) => {
         return r.lsbracket
             .then(optWhitespaced(r.value).sepBy(r.comma))
