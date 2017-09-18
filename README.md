@@ -1,6 +1,6 @@
-Run `npm run test` to test this script
+Run `npm run test` to test the script.
 
-test.js file contains example usage.
+/test/QueryParserSpec.js file contains example usage.
+Add more expressions for testing there.
 
 Doesn't support dates.
-
