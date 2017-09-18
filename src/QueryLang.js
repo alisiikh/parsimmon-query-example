@@ -86,8 +86,19 @@ let QueryLang = P.createLanguage({
         r.quotedString,
         r.decimalNumber,
         r.number,
-        r.array
+        r.array,
+        r.dateExpr
     ).desc("value"),
+
+    dateExpr: (r) => r.lbracket
+        .then(P.seq(optWhitespaced(r.date), word('-'), optWhitespaced(r.date)))
+        .skip(r.rbracket).map(results => {
+            console.log("parse me: " + results[0]);
+            console.log("I'm just useless: " + results[1]);
+            console.log("parse me: " + results[2]);
+
+            return [Date.parse(results[0]), results[1], Date.parse(results[2])];
+        }),
 
     lsbracket: () => word("["),
     rsbracket: () => word("]"),
@@ -97,6 +108,7 @@ let QueryLang = P.createLanguage({
     rbrace: () => word('}'),
     comma: () => word(','),
 
+    date: () => word("'").then(P.regexp(/\d{4}-\d{2}-\d{2}/)).skip(word("'")),
     quotedString: () => P.regexp(/"((?:\\.|.)*?)"/).map(interpretEscapes).desc("string"),
     decimalNumber: () => P.regexp(/-?(\d+(\.\d*)?|\d*\.\d+)/).map(Number).desc("decimal number"),
     number: () => P.regexp(/-?\d+/).map(Number).desc("number"),
