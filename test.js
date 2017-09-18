@@ -7,6 +7,8 @@ let expr4 = 'bc  =3 a           >   10  "3215"   st = "am"';
 let arrayExpr1 = 'arr= [ 1,   2 ,   3 ]';
 let arrayExpr2 = 'arr=[1,2,3]';
 let arrayExpr3 = 'arr=[1,2,3] wtf=3';
+let escapedExample = 'wtf="hello dude"';
+let escapedExample2 = 'wtf=\"hello dude\"';
 
 console.log(QueryParser.parse(expr));
 console.log(QueryParser.parse(expr2));
@@ -15,3 +17,5 @@ console.log(QueryParser.parse(expr4));
 console.log(QueryParser.parse(arrayExpr1));
 console.log(QueryParser.parse(arrayExpr2));
 console.log(QueryParser.parse(arrayExpr3));
+console.log(QueryParser.parse(escapedExample));
+console.log(QueryParser.parse(escapedExample2));

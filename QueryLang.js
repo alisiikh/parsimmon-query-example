@@ -17,6 +17,29 @@ let mapExpr = (results) => {
     }
 };
 
+// Turn escaped characters into real ones (e.g. "\\n" becomes "\n").
+// Taken from https://github.com/jneen/parsimmon/blob/master/examples/json.js#L11
+function interpretEscapes(str) {
+    let escapes = {
+        b: '\b',
+        f: '\f',
+        n: '\n',
+        r: '\r',
+        t: '\t'
+    };
+    return str.replace(/\\(u[0-9a-fA-F]{4}|[^u])/, (_, escape) => {
+        let type = escape.charAt(0);
+        let hex = escape.slice(1);
+        if (type === 'u') {
+            return String.fromCharCode(parseInt(hex, 16));
+        }
+        if (escapes.hasOwnProperty(type)) {
+            return escapes[type];
+        }
+        return type;
+    });
+}
+
 
 let QueryLang = P.createLanguage({
     /**
@@ -74,8 +97,7 @@ let QueryLang = P.createLanguage({
     rbrace: () => word('}'),
     comma: () => word(','),
 
-    // TODO: this regexp is not perfect, is it possible to have multiple repeatable " symbols in a string?
-    quotedString: () => P.regexp(/"([^"\x00-\x1F\x7F]|[a-fA-F0-9]{4})*"/).desc("string"),
+    quotedString: () => P.regexp(/"((?:\\.|.)*?)"/).map(interpretEscapes).desc("string"),
     decimalNumber: () => P.regexp(/(\d+(\.\d*)?|\d*\.\d+)/).map(Number).desc("decimal number"),
     number: () => P.regexp(/-?\d+/).map(Number).desc("number"),
     array: (r) => {
