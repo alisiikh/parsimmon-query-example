@@ -1,16 +1,14 @@
 let P = require('Parsimmon');
 
-let whitespace = P.optWhitespace.desc("whitespace (separator)");
+let optWhitespace = P.optWhitespace.desc("whitespace");
+let whitespace = P.whitespace.desc("separator");
+let word = (str) => P.string(str);
+
 /**
- * Token that might be wrapped with whitespaces.
+ * A token that might be wrapped with whitespaces.
  * @param parser
  */
-let token = (parser) => parser.skip(whitespace);
-/**
- * A string that might be wrapped with whitespaces.
- * @param str
- */
-let word = (str) => P.string(str).thru(token);
+let optWhitespaced = (parser) => optWhitespace.then(parser).skip(optWhitespace);
 let mapExpr = (results) => {
     return {
         "var": results[0],
@@ -31,8 +29,7 @@ let QueryLang = P.createLanguage({
     /**
      * Matches a key-value expr, e.g. key="value", key=43
      */
-    complexExpr: (r) => P.seq(r.variable, r.operator, r.value)
-        .thru(parser => whitespace.then(parser))
+    complexExpr: (r) => P.seq(r.variable, optWhitespaced(r.operator), r.value)
         .map(mapExpr)
         .desc("complex expression"),
 
@@ -40,14 +37,13 @@ let QueryLang = P.createLanguage({
      * Matches a value expr, e.g. "value"
      */
     valueExpr: (r) => r.quotedString
-        .thru(parser => whitespace.then(parser))
         .map((value) => mapExpr(["*", "=", value]))
         .desc("value expression"),
 
     /**
      * Matches a variable
      */
-    variable: () => token(P.regex(/[a-zA-Z_]\w*/)).desc("variable"),
+    variable: () => (P.regex(/[a-zA-Z_]\w*/)).desc("variable"),
     /**
      * Matches allowed operator
      */
@@ -79,15 +75,17 @@ let QueryLang = P.createLanguage({
     comma: () => word(','),
 
     // TODO: this regexp is not perfect, is it possible to have multiple repeatable " symbols in a string?
-    quotedString: () => token(P.regexp(/"([^"\x00-\x1F\x7F]|[a-fA-F0-9]{4})*"/)).desc("string"),
-    decimalNumber: () => token(P.regexp(/(\d+(\.\d*)?|\d*\.\d+)/)).map(Number).desc("decimal number"),
-    number: () => token(P.regexp(/-?\d+/)).map(Number).desc("number"),
+    quotedString: () => (P.regexp(/"([^"\x00-\x1F\x7F]|[a-fA-F0-9]{4})*"/)).desc("string"),
+    decimalNumber: () => (P.regexp(/(\d+(\.\d*)?|\d*\.\d+)/)).map(Number).desc("decimal number"),
+    number: () => (P.regexp(/-?\d+/)).map(Number).desc("number"),
     array: (r) => {
         return r.lsbracket
-            .then(r.value.sepBy(r.comma))
+            .then(optWhitespaced(r.value).sepBy(r.comma))
             .skip(r.rsbracket)
             .desc("array")
     }
 });
 
-module.exports = QueryLang;
+module.exports = {
+    parse: (queryDSL) => QueryLang.fullExpr.tryParse(queryDSL.trim())
+};
