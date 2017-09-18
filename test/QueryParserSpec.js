@@ -1,4 +1,5 @@
 let QueryParser = require('../src/QueryParser');
+let QueryLang = require('../src/QueryLang');
 let expect = require('chai').expect;
 
 describe("QueryParser", () => {
@@ -16,18 +17,33 @@ describe("QueryParser", () => {
             'arr=[1,2,3]',
             'arr=[1,2,3] wtf=3',
             'wtf="hello dude"',
-            'wtf=\"hello dude\"'
+            'wtf=\"hello dude\"',
+            'birthday=(\'2007-12-11\' -\'2008-01-01\')',
+            'birthday=( \'2007-12-11\'-\'2008-01-01\')',
+            'birthday=( \'2007-12-11\'-\'2008-01-01\' )',
+            'birthday=   ( \'2007-12-11\'     -\'2008-01-01\'     )',
         ];
 
         // when
         expressions.forEach((expr, idx) => {
             //then
             try {
-                QueryParser.parse(expr);
+                let exprObj = QueryParser.parse(expr);
+                console.log(exprObj);
             } catch (err) {
                 console.error("Failed to parse '" + expressions[idx] + "'", err);
                 throw err;
             }
         })
+    });
+
+    it("date is parsed accordingly", () => {
+        let result = QueryLang.date.tryParse("'2007-12-11'");
+        console.log(result);
+    });
+
+    it("date expression is parsed accordingly", () => {
+        let result = QueryLang.dateExpr.tryParse("('2007-12-11'-'2008-01-01')");
+        console.log(result);
     });
 });
