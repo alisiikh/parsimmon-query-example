@@ -1,5 +1,6 @@
-Run `npm run start` to test this script
+Run `npm run test` to test this script
+
+test.js file contains example usage.
 
 Doesn't support dates.
 
-To change query edit query-language.js bottom side expr.

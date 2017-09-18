@@ -4,7 +4,7 @@
   "description": "",
   "main": "query-language.js",
   "scripts": {
-    "start": "node ./query-language.js"
+    "test": "node ./test.js"
   },
   "author": "Oleksii Lisikh",
   "license": "ISC",
