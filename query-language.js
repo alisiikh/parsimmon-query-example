@@ -1,45 +1,17 @@
-var P = require('Parsimmon');
+let P = require('Parsimmon');
 
+let token = (parser) => parser.skip(P.optWhitespace);
+let word = (str) => P.string(str).thru(token);
 
-let whitespace = P.regexp(/\s*/m);
-function token(parser) {
-    return parser.skip(whitespace);
-}
-function word(str) {
-    return P.string(str).thru(token);
-}
-// TODO: might be helpful? From here: https://github.com/jneen/parsimmon/blob/master/examples/json.js
-function interpretEscapes(str) {
-    let escapes = {
-        b: '\b',
-        f: '\f',
-        n: '\n',
-        r: '\r',
-        t: '\t'
-    };
-    return str.replace(/\\(u[0-9a-fA-F]{4}|[^u])/, (_, escape) => {
-        let type = escape.charAt(0);
-        let hex = escape.slice(1);
-        if (type === 'u') {
-            return String.fromCharCode(parseInt(hex, 16));
-        }
-        if (escapes.hasOwnProperty(type)) {
-            return escapes[type];
-        }
-        return type;
-    });
-}
-
-
-var QueryLang = P.createLanguage({
-    fullExpr: function (r) {
-        return P.alt(r.expr, r.valueExpr).sepBy(r.separator);
-    },
+let QueryLang = P.createLanguage({
+    fullExpr: (r) => P.alt(r.expr, r.valueExpr).sepBy(r.separator).desc("full expression"),
     expr: function (r) {
-        return P.seq(r.variable.skip(r._), r.operator.skip(r._), r.value).map(function(results) {
+        return P.seq(r.variable.skip(r._), r.operator.skip(r._), r.value).map(function (results) {
             if (results.length === 1) {
+                // this is a value expression
                 return results[0];
             } else {
+                // this is a complex expr, e.g. key=value
                 return {
                     "var": results[0],
                     "operator": results[1],
@@ -47,55 +19,39 @@ var QueryLang = P.createLanguage({
                 }
             }
 
-        });
+        }).desc("complex expression");
     },
-    valueExpr: function (r) {
-        return r.quotedString
-    },
-    variable: function () {
-        return P.regex(/[a-zA-Z_]\w*/)
-    },
-    operator: function () {
-        return P.alt(
-            word("="),
-            word("!="),
-            word("<="),
-            word(">="),
-            word("<"),
-            word(">")
-        );
-    },
-    value: function (r) {
-        return P.alt(r.quotedString, r.decimalNumber, r.array)
-    },
-    separator: function () {
-        return P.whitespace;
-    },
-    quotedString: function () {
-        // TODO: this regexp is not perfect, is it possible to have multiple repeatable " symbols in a string?
-        return P.regexp(/"([^"\x00-\x1F\x7F]|[a-fA-F0-9]{4})*"/)
-    },
-    decimalNumber: function () {
-        return P.regexp(/(\d+(\.\d*)?|\d*\.\d+)/)
-    },
-    number: function () {
-        return P.regexp(/-?\d+/).map(Number)
-    },
-    array: function (r) {
+    valueExpr: (r) => r.quotedString.desc("value expression"),
+    variable: () => P.regex(/[a-zA-Z_]\w*/).desc("variable"),
+    operator: () => P.alt(
+        word("="),
+        word("!="),
+        word("<="),
+        word(">="),
+        word("<"),
+        word(">")
+    ).desc("operator"),
+    value: (r) => P.alt(
+        r.quotedString,
+        r.decimalNumber,
+        r.number,
+        r.array).desc("value"),
+    separator: () => P.whitespace.desc("separator"),
+
+    // TODO: this regexp is not perfect, is it possible to have multiple repeatable " symbols in a string?
+    quotedString: () => P.regexp(/"([^"\x00-\x1F\x7F]|[a-fA-F0-9]{4})*"/).desc("string"),
+    decimalNumber: () => P.regexp(/(\d+(\.\d*)?|\d*\.\d+)/).desc("decimal number").map(Number).desc("decimal number"),
+    number: () => P.regexp(/-?\d+/).map(Number).desc("number"),
+    array: (r) => {
         return word("[")
             .then(P.alt(r.quotedString, r.decimalNumber, r.number).sepBy(r._))
             .skip(word("]"))
+            .desc("array")
     },
-    _: function () {
-        return P.optWhitespace;
-    },
-
-    null: () => word('null').result(null),
-    true: () => word('true').result(true),
-    false: () => word('false').result(false),
+    _: () => P.optWhitespace.desc("whitespace")
 });
 
 
-let expr = "bc=5 a<3 g>10 stamm=\"No chto eto takoe\" \"xx\" x=[2 3 \"100500\"]";
+let expr = 'bc=5 a <3 g> 10 stamm = "5555" size=10 "full text search" x=[2 3 "100500"]';
 let result = QueryLang.fullExpr.tryParse(expr);
 console.log(result);
