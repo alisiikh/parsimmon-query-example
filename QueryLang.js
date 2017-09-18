@@ -19,7 +19,7 @@ let mapExpr = (results) => {
 
 // Turn escaped characters into real ones (e.g. "\\n" becomes "\n").
 // Taken from https://github.com/jneen/parsimmon/blob/master/examples/json.js#L11
-function interpretEscapes(str) {
+let interpretEscapes = (str) => {
     let escapes = {
         b: '\b',
         f: '\f',
@@ -38,7 +38,7 @@ function interpretEscapes(str) {
         }
         return type;
     });
-}
+};
 
 
 let QueryLang = P.createLanguage({
@@ -98,7 +98,7 @@ let QueryLang = P.createLanguage({
     comma: () => word(','),
 
     quotedString: () => P.regexp(/"((?:\\.|.)*?)"/).map(interpretEscapes).desc("string"),
-    decimalNumber: () => P.regexp(/(\d+(\.\d*)?|\d*\.\d+)/).map(Number).desc("decimal number"),
+    decimalNumber: () => P.regexp(/-?(\d+(\.\d*)?|\d*\.\d+)/).map(Number).desc("decimal number"),
     number: () => P.regexp(/-?\d+/).map(Number).desc("number"),
     array: (r) => {
         return r.lsbracket
@@ -108,6 +108,4 @@ let QueryLang = P.createLanguage({
     }
 });
 
-module.exports = {
-    parse: (queryDSL) => QueryLang.fullExpr.tryParse(queryDSL.trim())
-};
+module.exports = QueryLang;

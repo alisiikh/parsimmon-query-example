@@ -1,4 +1,4 @@
-let QueryParser = require('./QueryLang');
+let QueryParser = require('./QueryParser');
 
 let expr = 'bc=5 a <3 g> 10 stamm = "5555" size=10 "full text search" x=[2, 3, "100500"]';
 let expr2 = 'bc  =3 a>   10 st = "am"';
@@ -9,6 +9,9 @@ let arrayExpr2 = 'arr=[1,2,3]';
 let arrayExpr3 = 'arr=[1,2,3] wtf=3';
 let escapedExample = 'wtf="hello dude"';
 let escapedExample2 = 'wtf=\"hello dude\"';
+let decimal = 'wtf=2.33';
+let decimal2 = 'wtf=-2.33';
+let negNumber = 'wtf=-2';
 
 console.log(QueryParser.parse(expr));
 console.log(QueryParser.parse(expr2));
@@ -19,3 +22,6 @@ console.log(QueryParser.parse(arrayExpr2));
 console.log(QueryParser.parse(arrayExpr3));
 console.log(QueryParser.parse(escapedExample));
 console.log(QueryParser.parse(escapedExample2));
+console.log(QueryParser.parse(decimal));
+console.log(QueryParser.parse(decimal2));
+console.log(QueryParser.parse(negNumber));
