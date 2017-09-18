@@ -21,7 +21,9 @@ let QueryLang = P.createLanguage({
 
         }).desc("complex expression");
     },
-    valueExpr: (r) => r.quotedString.desc("value expression"),
+    valueExpr: (r) => r.quotedString.map((results) => {
+        return { var: "*", operator: "=", "value": results }
+    }).desc("value expression"),
     variable: () => P.regex(/[a-zA-Z_]\w*/).desc("variable"),
     operator: () => P.alt(
         word("="),
