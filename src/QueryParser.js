@@ -1,7 +1,9 @@
-let QueryLang = require('./QueryLang');
+const QueryLang = require('./QueryLang');
 
-let QueryParser = {
-    parse: (queryDSL) => QueryLang.fullExpr.tryParse(queryDSL.trim())
-};
+class QueryParser {
+    parse(queryDSL) {
+        return QueryLang.fullExpr.tryParse(queryDSL.trim());
+    }
+}
 
 module.exports = QueryParser;

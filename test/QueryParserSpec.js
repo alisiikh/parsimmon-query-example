@@ -1,11 +1,12 @@
-let QueryParser = require('../src/QueryParser');
-let QueryLang = require('../src/QueryLang');
-let expect = require('chai').expect;
+const QueryParser = require('../src/QueryParser');
+const QueryLang = require('../src/QueryLang');
+
+const queryParser = new QueryParser();
 
 describe("QueryParser", () => {
     it("parses all possible variations of expressions", () => {
         // given
-        let expressions = [
+        const expressions = [
             'wtf=2.33',
             'wtf=-2.33',
             'wtf=-2',
@@ -28,7 +29,7 @@ describe("QueryParser", () => {
         expressions.forEach((expr, idx) => {
             //then
             try {
-                let exprObj = QueryParser.parse(expr);
+                const exprObj = queryParser.parse(expr);
                 console.log(exprObj);
             } catch (err) {
                 console.error("Failed to parse '" + expressions[idx] + "'", err);
@@ -38,12 +39,12 @@ describe("QueryParser", () => {
     });
 
     it("date is parsed accordingly", () => {
-        let result = QueryLang.date.tryParse("'2007-12-11'");
+        const result = QueryLang.date.tryParse("'2007-12-11'");
         console.log(result);
     });
 
     it("date expression is parsed accordingly", () => {
-        let result = QueryLang.dateExpr.tryParse("('2007-12-11'-'2008-01-01')");
+        const result = QueryLang.dateExpr.tryParse("('2007-12-11'-'2008-01-01')");
         console.log(result);
     });
 });

@@ -1,15 +1,15 @@
-let P = require('Parsimmon');
+let P = require('parsimmon');
 
-let optWhitespace = P.optWhitespace.desc("whitespace");
-let whitespace = P.whitespace.desc("separator");
-let word = (str) => P.string(str);
+const optWhitespace = P.optWhitespace.desc("whitespace");
+const whitespace = P.whitespace.desc("separator");
+const word = (str) => P.string(str);
 
 /**
  * A token that might be wrapped with whitespaces.
  * @param parser
  */
-let optWhitespaced = (parser) => optWhitespace.then(parser).skip(optWhitespace);
-let mapExpr = (results) => {
+const optWhitespaced = (parser) => optWhitespace.then(parser).skip(optWhitespace);
+const mapExpr = (results) => {
     return {
         "var": results[0],
         "operation": results[1],
@@ -19,8 +19,8 @@ let mapExpr = (results) => {
 
 // Turn escaped characters into real ones (e.g. "\\n" becomes "\n").
 // Taken from https://github.com/jneen/parsimmon/blob/master/examples/json.js#L11
-let interpretEscapes = (str) => {
-    let escapes = {
+const interpretEscapes = (str) => {
+    const escapes = {
         b: '\b',
         f: '\f',
         n: '\n',
@@ -28,8 +28,8 @@ let interpretEscapes = (str) => {
         t: '\t'
     };
     return str.replace(/\\(u[0-9a-fA-F]{4}|[^u])/, (_, escape) => {
-        let type = escape.charAt(0);
-        let hex = escape.slice(1);
+        const type = escape.charAt(0);
+        const hex = escape.slice(1);
         if (type === 'u') {
             return String.fromCharCode(parseInt(hex, 16));
         }
@@ -41,7 +41,7 @@ let interpretEscapes = (str) => {
 };
 
 
-let QueryLang = P.createLanguage({
+const QueryLang = P.createLanguage({
     /**
      * Matches a whole expression
      */
@@ -93,10 +93,6 @@ let QueryLang = P.createLanguage({
     dateExpr: (r) => r.lbracket
         .then(P.seq(optWhitespaced(r.date), word('-'), optWhitespaced(r.date)))
         .skip(r.rbracket).map(results => {
-            console.log("parse me: " + results[0]);
-            console.log("I'm just useless: " + results[1]);
-            console.log("parse me: " + results[2]);
-
             return [Date.parse(results[0]), results[1], Date.parse(results[2])];
         }),
 
